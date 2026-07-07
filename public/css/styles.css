@@ -4,6 +4,10 @@
    ============================================================ */
 
 :root {
+  /* This is a light "paper" design — opt out of browser force-dark so the
+     intended warm theme always shows (Chrome Auto Dark Mode respects this). */
+  color-scheme: light;
+
   --paper:    #f4efe3;
   --paper-2:  #efe7d6;
   --card:     #fbf8f0;
