@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Split · Status</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%A7%BE%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="masthead">
+      <a class="brand" href="index.html">
+        <span class="logo">Spl<em>i</em>t</span>
+        <span class="tag">even · to · the · cent</span>
+      </a>
+      <nav class="tabs">
+        <a href="index.html">Dashboard</a>
+        <a href="docs.html">How it works</a>
+        <a href="status.html" aria-current="page">Status</a>
+      </nav>
+    </header>
+
+    <section class="lede rise">
+      <h1>Connection &amp; toolchain status</h1>
+      <p>A live health check of the running service, and an honest account of the skills and tools that actually built this — nothing pretend-connected.</p>
+    </section>
+
+    <!-- LIVE HEALTH -->
+    <div class="health rise" style="animation-delay: 60ms">
+      <span class="pulse" id="pulse"></span>
+      <div class="h-main">
+        <div class="h-status" id="h-status">Checking…</div>
+        <div class="h-detail" id="h-detail">contacting /api/health</div>
+      </div>
+      <div class="h-metrics">
+        <div class="metric"><div class="k">Database</div><div class="v mono" id="m-db">—</div></div>
+        <div class="metric"><div class="k">Saved bills</div><div class="v mono" id="m-bills">—</div></div>
+        <div class="metric"><div class="k">Uptime</div><div class="v mono" id="m-uptime">—</div></div>
+      </div>
+    </div>
+
+    <!-- TOOLS USED -->
+    <div class="section-title">Skills &amp; tools used to build this</div>
+    <div class="tool-grid rise" id="tools" style="animation-delay: 120ms"></div>
+
+    <!-- NOT NEEDED -->
+    <div class="notneeded">
+      <div class="section-title">Considered, but not needed</div>
+      <div id="notneeded"></div>
+    </div>
+
+    <footer class="foot">
+      <span>Split · status</span>
+      <span id="last-check">—</span>
+    </footer>
+  </div>
+
+  <script src="js/status.js"></script>
+</body>
+</html>

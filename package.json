@@ -1,0 +1,17 @@
+{
+  "name": "split-billing-bill",
+  "version": "1.0.0",
+  "description": "Split a bill fairly across people with weighted shares — cents always reconcile to the exact total.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Split · How it works</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%A7%BE%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="masthead">
+      <a class="brand" href="index.html">
+        <span class="logo">Spl<em>i</em>t</span>
+        <span class="tag">even · to · the · cent</span>
+      </a>
+      <nav class="tabs">
+        <a href="index.html">Dashboard</a>
+        <a href="docs.html" aria-current="page">How it works</a>
+        <a href="status.html">Status</a>
+      </nav>
+    </header>
+
+    <section class="lede rise">
+      <h1>How it works</h1>
+      <p>A short manual: what the app does, how the fair-split math works, the rules for bad input, the API, and how to run it in one container.</p>
+    </section>
+
+    <article class="doc rise" style="animation-delay: 60ms">
+
+      <h2>What Split does</h2>
+      <p>Split answers one question precisely: <em>“We owe a total of X — who pays how much?”</em>. You enter a total and the people involved. Anyone can be given a larger <strong>share</strong> (a weight) when they should cover more — for example a share of <code>2</code> means that person pays twice what a share of <code>1</code> person pays. Split then shows each person's amount, rounded to the cent, and guarantees the amounts add back up to the exact total.</p>
+
+      <h2>Using the dashboard</h2>
+      <div class="step"><div class="n">1</div><div><strong>Name the bill</strong> (optional) — e.g. “Friday dinner”. It's just a label for the saved record.</div></div>
+      <div class="step"><div class="n">2</div><div><strong>Enter the total</strong> and pick a currency. The receipt on the right updates live as you type.</div></div>
+      <div class="step"><div class="n">3</div><div><strong>Add people</strong> and set each person's share. Leave every share at <code>1</code> for an even split; bump one to <code>2</code> (or more) for an uneven one.</div></div>
+      <div class="step"><div class="n">4</div><div><strong>Watch the stamp.</strong> When the per-person amounts reconcile to the exact total, the receipt shows a green <em>“✓ reconciles exactly”</em> stamp.</div></div>
+      <div class="step"><div class="n">5</div><div><strong>Save</strong> to store it. Saved splits appear below the form; each can be re-opened to <strong>edit</strong> or <strong>delete</strong> — that's the full create / read / update / delete cycle.</div></div>
+
+      <h2>The fair-split math</h2>
+      <p>Splitting money is deceptively tricky. If you split <code>$100.00</code> three ways, each “true” share is <code>$33.333…</code>. Round each to <code>$33.33</code> and you've only handed out <code>$99.99</code> — a penny vanishes. Round up and you hand out <code>$100.02</code> — two extra pennies appear. Neither is acceptable for money.</p>
+
+      <p>Split solves this with the <strong>largest-remainder method</strong> (also called Hamilton's method), working entirely in whole cents so floating-point drift can't creep in:</p>
+      <ol>
+        <li>Convert the total to an integer number of <strong>cents</strong>.</li>
+        <li>Give each person their exact fractional share of those cents, then <strong>round each down</strong> (floor).</li>
+        <li>Flooring leaves a few leftover cents (always fewer than the number of people).</li>
+        <li>Hand those leftover cents out <strong>one at a time to the people with the largest fractional parts</strong> — the ones who were rounded down the most.</li>
+      </ol>
+
+      <div class="callout">
+        <strong>The guarantee:</strong> because every leftover cent is distributed rather than dropped, the per-person amounts <em>always</em> sum to the exact total — no missing or extra cents, for any total, any number of people, and any mix of shares. This property is locked in by an automated test that checks 2,000 randomized splits on every run.
+      </div>
+
+      <h3>Worked example — $100.00, evenly, 3 people</h3>
+      <p>Total = <code>10000</code>¢. Each exact share = <code>3333.33…</code>¢. Floor each → <code>3333, 3333, 3333</code> = <code>9999</code>¢. One cent is left over; it goes to the largest fractional part (the first person). Result: <code>$33.34, $33.33, $33.33</code> — which sums to exactly <code>$100.00</code>.</p>
+
+      <h3>Worked example — $100.00, shares 2 · 1 · 1</h3>
+      <p>Total weight = <code>4</code>. Shares split the <code>10000</code>¢ as <code>5000, 2500, 2500</code> → <code>$50.00, $25.00, $25.00</code>.</p>
+
+      <h2>Handling bad input</h2>
+      <p>Split validates before it computes and shows a clear message instead of a wrong number or a crash:</p>
+      <ul>
+        <li><strong>Empty or non-numeric total</strong> → “Total must be a valid number.”</li>
+        <li><strong>Zero or negative total</strong> → “Total must be greater than 0.”</li>
+        <li><strong>No people</strong> → “Add at least one person to split between.”</li>
+        <li><strong>A share that is zero, negative, or not a number</strong> → “Weight for person N must be greater than 0” (or “…a valid number”).</li>
+        <li>A missing share defaults to <code>1</code>. A total with extra precision is rounded to the nearest cent.</li>
+      </ul>
+      <p>The same validation runs in the browser (for instant feedback) and again on the server (as the authoritative gate), so a bad value can never reach the database.</p>
+
+      <h2>REST API</h2>
+      <p>The dashboard is a thin client over a small JSON API. A saved bill stores its inputs <em>and</em> the computed per-person amounts.</p>
+      <table class="apitable">
+        <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><span class="method get">GET</span></td><td class="m">/api/bills</td><td>List all saved splits (newest first).</td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="m">/api/bills/:id</td><td>Read one split.</td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="m">/api/bills</td><td>Validate, compute, and create a split.</td></tr>
+          <tr><td><span class="method put">PUT</span></td><td class="m">/api/bills/:id</td><td>Update a split (recomputes the amounts).</td></tr>
+          <tr><td><span class="method del">DELETE</span></td><td class="m">/api/bills/:id</td><td>Delete a split.</td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="m">/api/health</td><td>Liveness + DB status (drives the Status page).</td></tr>
+        </tbody>
+      </table>
+      <p>Create a split from the command line:</p>
+      <pre><code>curl -X POST http://localhost:3000/api/bills \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Dinner","total":100,
+       "participants":[{"name":"Ana","weight":2},
+                       {"name":"Bob"},{"name":"Cy"}]}'</code></pre>
+
+      <h2>Running it — one container</h2>
+      <p>The entire app — the Node/Express server, the vanilla-JS frontend, and the SQLite database — ships inside a single Docker image. There is no external database to connect to.</p>
+      <pre><code># build the image
+docker build -t split-billing-bill .
+
+# run the one container
+docker run -p 3000:3000 split-billing-bill
+
+# then open http://localhost:3000</code></pre>
+      <div class="callout">
+        <strong>Self-contained:</strong> the SQLite file lives at <code>/app/data/bills.db</code> inside the container. To keep saved splits across restarts, mount a volume: <code>docker run -p 3000:3000 -v split-data:/app/data split-billing-bill</code>.
+      </div>
+
+      <h3>Running without Docker</h3>
+      <pre><code>npm install
+npm start        # serves http://localhost:3000
+npm test         # runs the split-algorithm test suite</code></pre>
+      <p>Requires Node 22.5+ (for the built-in <code>node:sqlite</code> module — no native build step).</p>
+    </article>
+
+    <footer class="foot">
+      <span>Split · documentation</span>
+      <span>largest-remainder method · integer-cent arithmetic</span>
+    </footer>
+  </div>
+</body>
+</html>
