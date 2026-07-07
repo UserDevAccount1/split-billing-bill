@@ -6,6 +6,12 @@ extra pennies, ever.
 
 Vanilla JS + static HTML frontend · Express REST API · embedded SQLite · **one Docker container**.
 
+**🔗 Live demo (static build):** https://userdevaccount1.github.io/split-billing-bill/
+
+> The live demo is the **static** build on GitHub Pages — the calculator runs fully in your
+> browser and saved splits persist to `localStorage` (no backend). Run the Docker container
+> below for the full build with the Express API and SQLite persistence.
+
 ---
 
 ## Features
